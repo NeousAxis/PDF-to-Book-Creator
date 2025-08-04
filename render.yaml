@@ -1,0 +1,18 @@
+services:
+  - type: static_site
+    name: pdf-to-book-creator-v2
+    env: static
+    plan: free
+    buildCommand: "pnpm install && pnpm run build"
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_LULU_CLIENT_ID
+        fromGroup: lulu-api-keys
+      - key: VITE_LULU_CLIENT_SECRET
+        fromGroup: lulu-api-keys
+      - key: VITE_LULU_API_BASE
+        value: https://api.lulu.com/v1
+      - key: VITE_OPENAI_API_KEY
+        fromGroup: openai-api-key
+      - key: VITE_DEV_MODE
+        value: false
