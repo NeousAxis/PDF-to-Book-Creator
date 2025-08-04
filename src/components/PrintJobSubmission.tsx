@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { DocumentFile, CoverDesign, BookTemplate, PrintJob, CostCalculation } from '@/types';
 import { luluAPI } from '@/lib/lulu-api';
 import { uploadFileToStorage } from '@/lib/file-utils';
+import { generateCover } from '@/lib/cover-generator';
 import { 
   Send, 
   CheckCircle, 
@@ -64,9 +65,15 @@ export default function PrintJobSubmission({
       
       setSubmissionProgress(40);
       
-      // Generate cover file (in a real app, this would be the actual cover file)
-      const coverBlob = new Blob(['mock cover data'], { type: 'application/pdf' });
-      const coverFile = new File([coverBlob], 'cover.pdf', { type: 'application/pdf' });
+      // Generate cover file using the new generator
+      const coverFile = await generateCover({
+        title: document.file.name.replace(/\.[^/.]+$/, ''), // Use document title
+        backCoverText: coverDesign.backText || ' ',
+        authorBio: coverDesign.authorBio || ' ',
+        widthInches: template.dimensions.width,
+        heightInches: template.dimensions.height,
+        spineWidthInches: document.pages * 0.002252, // Approximate spine width
+      });
       const coverFileUrl = await uploadFileToStorage(coverFile);
       
       setSubmissionProgress(60);
