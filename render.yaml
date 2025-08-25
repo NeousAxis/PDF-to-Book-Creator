@@ -1,11 +1,13 @@
 services:
-  - type: static_site
+  - type: web
     name: pdf-to-book-creator-v2
-    env: static
+    env: node
     plan: free
     buildCommand: "pnpm install && pnpm run build"
-    staticPublishPath: ./dist
+    startCommand: "node start.js"
     envVars:
+      - key: NODE_VERSION
+        value: "18.18.0"
       - key: DEPLOY_TAG
         value: "force-redeploy-2025-08-25-1"
       - key: VITE_LULU_CLIENT_ID
@@ -18,3 +20,9 @@ services:
         fromGroup: openai-api-key
       - key: VITE_DEV_MODE
         value: false
+      - key: LULU_CLIENT_ID
+        fromGroup: lulu-api-keys
+      - key: LULU_CLIENT_SECRET
+        fromGroup: lulu-api-keys
+      - key: LULU_API_BASE
+        value: https://api.lulu.com/v1
