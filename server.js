@@ -1,4 +1,3 @@
-
 const express = require('express');
 const multer = require('multer');
 const { PDFDocument } = require('pdf-lib');
@@ -12,7 +11,23 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.static('public'));
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
+
+// ---- Global request logger (pour voir *quelque chose* dans Render Logs)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// ---- Routes de diagnostic
+app.get('/__ping', (_req, res) => {
+  console.log('PING OK');
+  res.status(200).send('ok');
+});
+app.post('/__echo', (req, res) => {
+  console.log('ECHO BODY:', req.body);
+  res.status(200).json({ received: req.body || null });
+});
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -103,6 +118,7 @@ app.post("/api/cost", async (req, res) => {
   try {
     const { line_items, shipping_address, shipping_option } = req.body;
     if (!line_items || !shipping_address || !shipping_option) {
+      console.error("❌ /api/cost missing fields:", { line_items: !!line_items, shipping_address: !!shipping_address, shipping_option: !!shipping_option });
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -114,13 +130,21 @@ app.post("/api/cost", async (req, res) => {
       { headers: { "Authorization": `Bearer ${token}` } }
     );
 
-    res.json(resp.data);
+    console.log("✅ Lulu cost response:", resp.data);
+    res.status(200).json(resp.data);
   } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Cost calculation failed" });
+    const details = err?.response?.data || err?.message || 'unknown error';
+    console.error("❌ /api/cost error:", details);
+    res.status(500).json({ error: "Cost calculation failed", details });
   }
 });
 
+// ---- Global error handler (au cas où)
+app.use((err, _req, res, _next) => {
+  console.error('❌ Uncaught error:', err?.stack || err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
 app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
+    console.log(`🚀 Server listening at http://localhost:${port}`);
 });
