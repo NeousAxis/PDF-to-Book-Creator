@@ -9,7 +9,7 @@ services:
       - key: NODE_VERSION
         value: "18.18.0"
       - key: DEPLOY_TAG
-        value: "force-redeploy-2025-08-25-2"
+        value: "force-redeploy-2025-08-25-3"
       - key: VITE_LULU_CLIENT_ID
         fromGroup: lulu-api-keys
       - key: VITE_LULU_CLIENT_SECRET
