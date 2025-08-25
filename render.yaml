@@ -6,6 +6,8 @@ services:
     buildCommand: "pnpm install && pnpm run build"
     staticPublishPath: ./dist
     envVars:
+      - key: DEPLOY_TAG
+        value: "force-redeploy-2025-08-25-1"
       - key: VITE_LULU_CLIENT_ID
         fromGroup: lulu-api-keys
       - key: VITE_LULU_CLIENT_SECRET
